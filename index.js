@@ -1,4 +1,4 @@
-let progressBar = document.querySelector("#health progress");
+let healthBar = document.querySelector("#health progress");
 let weaponBar = document.querySelector("#weapon progress");
 let citizenBar = document.querySelector("#citizen progress");
 let moneyAmount = document.querySelector("#money span");
@@ -147,14 +147,14 @@ class Player {
     }
   }
   takeHit() {
-    if (progressBar.value > 0) {
+    if (healthBar.value > 0) {
       this.health -= 2;
     }
-    progressBar.value = this.health;
+    healthBar.value = this.health;
   }
   gainHealth() {
-    this.health += 0.5;
-    progressBar.value = this.health;
+    this.health += 0.25;
+    healthBar.value = this.health;
   }
   getMoney() {
     this.money += 50;
@@ -198,7 +198,7 @@ function heal(thing) {
   return (
     thing.x < hospitalWidth &&
     thing.y < hospitalWidth &&
-    progressBar.value < 100
+    healthBar.value < 100
   );
 }
 
@@ -441,6 +441,7 @@ function randomPointInBank() {
 
 function mouseClicked() {
   player.health = 100;
+  healthBar.value = player.health;
   weaponBar.value = 0;
   citizenBar.value = 0;
   player.money = 0;
