@@ -20,19 +20,6 @@ let [bankWall, bankRoof, bankWidth, bankHeight] = [480, 0, 520, 250];
 let [armoryWall, armoryRoof, armoryWidth, armoryHeight] = [480, 450, 520, 150];
 let [sidewalk, curb] = [10, 30];
 
-const context = new window.AudioContext();
-function playFile(filepath) {
-fetch(filepath)
-    .then(response => response.arrayBuffer())
-    .then(arrayBuffer => context.decodeAudioData(arrayBuffer))
-    .then(audioBuffer => {
-      const soundSource = context.createBufferSource();
-      soundSource.buffer = audioBuffer;
-      soundSource.connect(context.destination);
-      soundSource.start();
-    });
-}
-
 function preload() {
   bankLogo = loadImage("https://i.imgur.com/31ynffh.png");
   hospitalLogo = loadImage("https://i.imgur.com/VnI3KoD.png");
@@ -435,6 +422,13 @@ function drawHospital() {
   image(hospitalLogo, 0, height * 0.01, 70, 47);
 }
 
+function gameOver() {
+  fill("black");
+  for (x = 0; x < width; x += 50) {
+    rect(x, 0, 20, height);
+  }
+}
+
 function randomSpeed() {
   return 1 + Math.random() * 2;
 }
@@ -464,12 +458,6 @@ function mouseClicked() {
   moneyBags[1].x = money2x;
   moneyBags[1].y = money2y;
   loop();
-}
-
-function gameOver() {
-  if (player.health === 0) {
-    playFile("https://s3-us-west-2.amazonaws.com/s.cdpn.io/3/success.mp3");
-  }
 }
 
 let [copTimer, moneyBagTimer] = [6000, 3000];
@@ -551,9 +539,10 @@ function draw() {
     player.gainHealth();
   }
   if (player.health === 0) {
-    gameOver();
     noLoop();
+    gameOver();
   }
+
   for (enemy of enemies) {
     if (collided(player, enemy)) {
       player.takeHit();
