@@ -6,15 +6,35 @@ let moneyAmount = document.querySelector("#money span");
 const width = 1000;
 const height = 600;
 
-let [hospitalWall, hospitalRoof, hospitalWidth, hospitalHeight] = [0, 0, 250, 250];
+
+
+let [hospitalWall, hospitalRoof, hospitalWidth, hospitalHeight] = [
+  0,
+  0,
+  250,
+  250
+];
 let [bankWall, bankRoof, bankWidth, bankHeight] = [480, 0, 520, 250];
 let [armoryWall, armoryRoof, armoryWidth, armoryHeight] = [480, 450, 520, 150];
-let [sidewalk, curb] = [10, 30]
+let [sidewalk, curb] = [10, 30];
+
+const context = new window.AudioContext();
+function playFile(filepath) {
+  fetch(filepath)
+    .then(response => response.arrayBuffer())
+    .then(arrayBuffer => context.decodeAudioData(arrayBuffer))
+    .then(audioBuffer => {
+      const soundSource = context.createBufferSource();
+      soundSource.buffer = audioBuffer;
+      soundSource.connect(context.destination);
+      soundSource.start();
+    });
+}
 
 function preload() {
-    bankLogo = loadImage("https://i.imgur.com/31ynffh.png");
-    hospitalLogo = loadImage("https://i.imgur.com/VnI3KoD.png");
-    bombLogo = loadImage("https://i.imgur.com/kvoZS7Y.png");
+  bankLogo = loadImage("https://i.imgur.com/31ynffh.png");
+  hospitalLogo = loadImage("https://i.imgur.com/VnI3KoD.png");
+  bombLogo = loadImage("https://i.imgur.com/kvoZS7Y.png");
   playerSprite = loadImage("https://i.imgur.com/8PDfSBd.png");
   enemySprite = loadImage("https://i.imgur.com/MyyVCRq.png");
   moneySprite = loadImage("https://i.imgur.com/p7WOpvy.png");
@@ -75,11 +95,7 @@ document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 
 function loadWeaponBar() {
-  if (
-    player.x > armoryWall &&
-    player.y > armoryRoof &&
-    weaponBar.value < 100
-  ) {
+  if (player.x > armoryWall && player.y > armoryRoof && weaponBar.value < 100) {
     weaponBar.value += 0.5;
   }
 }
@@ -191,7 +207,9 @@ function deleteCitizen() {
 
 function heal(thing) {
   return (
-    thing.x < hospitalWidth && thing.y < hospitalWidth && progressBar.value < 100
+    thing.x < hospitalWidth &&
+    thing.y < hospitalWidth &&
+    progressBar.value < 100
   );
 }
 
@@ -247,7 +265,7 @@ class policeCarVertical {
     this.size = { width: 60, height: 100 };
   }
   render() {
-    fill(this.color);    
+    fill(this.color);
     image(
       policeCarVerticalSprite,
       this.x - this.size.width / 2,
@@ -353,7 +371,7 @@ function destroyNearbyEnemies() {
 }
 
 function takeMoneyBag() {
-  money = moneyBags.filter(m => !collided(player, m));
+  moneyBags = moneyBags.filter(m => !collided(player, m));
 }
 
 function isArrayFull(array) {
@@ -379,20 +397,35 @@ function drawBank() {
   fill("lightgrey");
   rect(bankWall - curb, bankRoof, bankWidth + curb, bankHeight + curb);
   fill("white");
-  rect(bankWall - sidewalk, bankRoof, bankWidth + sidewalk, bankHeight + sidewalk);
+  rect(
+    bankWall - sidewalk,
+    bankRoof,
+    bankWidth + sidewalk,
+    bankHeight + sidewalk
+  );
   fill("#f7e48f");
   rect(bankWall, bankRoof, bankWidth, bankHeight);
-  image(bankLogo, width * 0.475, height * .01, 50, 50)
+  image(bankLogo, width * 0.49, height * 0.01, 50, 50);
 }
 
 function drawArmory() {
   fill("lightgrey");
-  rect(armoryWall - curb, armoryRoof - curb, armoryWidth + curb, armoryHeight + curb);
+  rect(
+    armoryWall - curb,
+    armoryRoof - curb,
+    armoryWidth + curb,
+    armoryHeight + curb
+  );
   fill("white");
-  rect(armoryWall - sidewalk, armoryRoof - sidewalk, armoryWidth + sidewalk, armoryHeight + sidewalk);
+  rect(
+    armoryWall - sidewalk,
+    armoryRoof - sidewalk,
+    armoryWidth + sidewalk,
+    armoryHeight + sidewalk
+  );
   fill("pink");
   rect(armoryWall, armoryRoof, armoryWidth, armoryHeight);
-  image(bombLogo, width * 0.46, height * .75, 90, 60)
+  image(bombLogo, width * 0.46, height * 0.75, 90, 60);
 }
 
 function drawFountain() {
@@ -408,10 +441,15 @@ function drawHospital() {
   fill("lightgrey");
   rect(hospitalWall, hospitalRoof, hospitalWidth + curb, hospitalHeight + curb);
   fill("white");
-  rect(hospitalWall, hospitalRoof, hospitalWidth + sidewalk, hospitalHeight + sidewalk);
+  rect(
+    hospitalWall,
+    hospitalRoof,
+    hospitalWidth + sidewalk,
+    hospitalHeight + sidewalk
+  );
   fill("#a8eda6");
   rect(hospitalWall, hospitalRoof, hospitalWidth, hospitalHeight);
-  image(hospitalLogo, 0, height * .01, 70, 47)
+  image(hospitalLogo, 0, height * 0.01, 70, 47);
 }
 
 function randomPointOnCanvas() {
@@ -421,6 +459,9 @@ function randomPointOnCanvas() {
   ];
 }
 
+function randomSpeed() {
+  return 1 + Math.random() * 2;
+}
 function randomPointInBank() {
   return [
     bankWall + Math.floor(Math.random() * bankWidth),
@@ -428,27 +469,40 @@ function randomPointInBank() {
   ];
 }
 
+function mouseClicked() {
+    draw();
+    player.health = 100;
+    weaponBar.value = 0;
+    citizenBar.value = 0;
+    player.money = 0;
+    moneyAmount.textContent = 0;
+    player.x = 30;
+    player.y = 550;
+    loop();
+}
+
+
 function gameOver() {
-  let circleRadius = 50;
-  fill(0);
-  if (circleradius < 100) {
-    circleRadius += 1;
-    circle(width / 2, height / 2, circleRadius);
+  if (player.health === 0) {
+    playFile("https://s3-us-west-2.amazonaws.com/s.cdpn.io/3/success.mp3");
   }
 }
 
+let [copTimer, moneyBagTimer] = [6000, 3000]
+
 function createEnemy() {
   if (enemies.length < player.money / 50 + 3) {
-    enemies.unshift(new Enemy(...randomPointInBank(), 2.0));
+    enemies.unshift(new Enemy(...randomPointInBank(), randomSpeed()));
   }
 }
-let createEnemyTimer = setInterval(createEnemy, 6000);
+let createEnemyTimer = setInterval(createEnemy, copTimer);
+
 function createMoney() {
-  if (moneyBags.length < 3) {
+  if (moneyBags.length < 4) {
     moneyBags.unshift(new Money(...randomPointInBank()));
   }
 }
-let createMoneyTimer = setInterval(createMoney, 3000);
+let createMoneyTimer = setInterval(createMoney, moneyBagTimer);
 
 let player = new Player(30, 550);
 let moneyBags = [
@@ -468,6 +522,34 @@ let policeCarsHorizontal = [
   new policeCarHorizontal(370, 310, 4.0),
   new policeCarHorizontal(200, 390, 5.0)
 ];
+
+function adjustSprites() {
+  const characters = [
+    player,
+    ...enemies,
+    ...policeCarsVertical,
+    ...policeCarsHorizontal
+  ];
+  for (let i = 0; i < characters.length; i++) {
+    for (let j = i + 1; j < characters.length; j++) {
+      pushOff(characters[i], characters[j]);
+    }
+  }
+}
+
+function pushOff(c1, c2) {
+  let [dx, dy] = [c2.x - c1.x, c2.y - c1.y];
+  const distance = Math.hypot(dx, dy);
+  let overlap = (c1.diameter + c2.diameter) / 2 - distance;
+  if (overlap > 0) {
+    const adjustX = overlap / 2 * (dx / distance);
+    const adjustY = overlap / 2 * (dy / distance);
+    c1.x -= adjustX;
+    c1.y -= adjustY;
+    c2.x += adjustX;
+    c2.y += adjustY;
+  }
+}
 
 function setup() {
   createCanvas(width, height);
@@ -492,16 +574,18 @@ function draw() {
   if (heal(player)) {
     player.gainHealth();
   }
+  if (player.health === 0) {
+    gameOver();
+    noLoop();
+  }
   for (enemy of enemies) {
     if (collided(player, enemy)) {
       player.takeHit();
     }
     if (isArrayFull(citizens)) {
       enemy.chaseDecoy();
-    } else if (player.x > bankWall - 3*curb && player.y < bankHeight + 3*curb) {
-      enemy.move();
     } else {
-      enemy.return();
+      enemy.move();
     }
     enemy.render();
   }
@@ -521,9 +605,10 @@ function draw() {
   }
 
   for (money of moneyBags) {
-       money.render();
     if (collided(player, money)) {
       player.getMoney();
     }
-}
+    money.render();
+  }
+  adjustSprites();
 }
