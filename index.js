@@ -148,7 +148,7 @@ class Player {
   }
   takeHit() {
     if (progressBar.value > 0) {
-      this.health -= 1;
+      this.health -= 2;
     }
     progressBar.value = this.health;
   }
