@@ -6,7 +6,9 @@ let moneyAmount = document.querySelector("#money span");
 const width = 1000;
 const height = 600;
 
-
+let [playerStartX, playerStartY] = [30, 550];
+let [enemy1x, enemy1y, enemy2x, enemy2y] = [600, 20, 800, 200];
+let [money1x, money1y, money2x, money2y] = [900, 200, 700, 100];
 
 let [hospitalWall, hospitalRoof, hospitalWidth, hospitalHeight] = [
   0,
@@ -20,7 +22,7 @@ let [sidewalk, curb] = [10, 30];
 
 const context = new window.AudioContext();
 function playFile(filepath) {
-  fetch(filepath)
+fetch(filepath)
     .then(response => response.arrayBuffer())
     .then(arrayBuffer => context.decodeAudioData(arrayBuffer))
     .then(audioBuffer => {
@@ -257,7 +259,7 @@ class Enemy {
 
 class policeCarVertical {
   constructor(x, y, speed) {
-    this.diameter = 30;
+    this.diameter = 80;
     this.color = "red";
     this.speed = speed;
     this.x = x;
@@ -285,7 +287,7 @@ class policeCarVertical {
 
 class policeCarHorizontal {
   constructor(x, y, speed) {
-    this.diameter = 30;
+    this.diameter = 80;
     this.color = "red";
     this.speed = speed;
     this.x = x;
@@ -308,25 +310,6 @@ class policeCarHorizontal {
     } else if (this.x > width) {
       this.x = 0;
     }
-  }
-}
-
-class enemyFBI {
-  constructor(x, y, speed) {
-    this.diameter = 30;
-    this.color = "red";
-    this.health = 100;
-    this.speed = speed;
-    this.x = x;
-    this.y = y;
-  }
-  render() {
-    fill(this.color);
-    circle(this.x, this.y, this.diameter);
-  }
-  move() {
-    this.x += this.speed * (player.x - this.x);
-    this.y += this.speed * (player.y - this.y);
   }
 }
 
@@ -452,35 +435,36 @@ function drawHospital() {
   image(hospitalLogo, 0, height * 0.01, 70, 47);
 }
 
-function randomPointOnCanvas() {
-  return [
-    Math.floor(Math.random() * width),
-    Math.floor(Math.random() * height)
-  ];
-}
-
 function randomSpeed() {
   return 1 + Math.random() * 2;
 }
 function randomPointInBank() {
   return [
     bankWall + Math.floor(Math.random() * bankWidth),
-    Math.floor(Math.random() * bankHeight) - 18
+    Math.floor(Math.random() * bankHeight) + 5
   ];
 }
 
 function mouseClicked() {
-    draw();
-    player.health = 100;
-    weaponBar.value = 0;
-    citizenBar.value = 0;
-    player.money = 0;
-    moneyAmount.textContent = 0;
-    player.x = 30;
-    player.y = 550;
-    loop();
+  player.health = 100;
+  weaponBar.value = 0;
+  citizenBar.value = 0;
+  player.money = 0;
+  moneyAmount.textContent = 0;
+  player.x = playerStartX;
+  player.y = playerStartY;
+  enemies.splice(2, enemies.length);
+  enemies[0].x = enemy1x;
+  enemies[0].y = enemy1y;
+  enemies[1].x = enemy2x;
+  enemies[1].y = enemy2y;
+  moneyBags.splice(2, moneyBags.length);
+  moneyBags[0].x = money1x;
+  moneyBags[0].y = money1y;
+  moneyBags[1].x = money2x;
+  moneyBags[1].y = money2y;
+  loop();
 }
-
 
 function gameOver() {
   if (player.health === 0) {
@@ -488,7 +472,7 @@ function gameOver() {
   }
 }
 
-let [copTimer, moneyBagTimer] = [6000, 3000]
+let [copTimer, moneyBagTimer] = [6000, 3000];
 
 function createEnemy() {
   if (enemies.length < player.money / 50 + 3) {
@@ -504,14 +488,11 @@ function createMoney() {
 }
 let createMoneyTimer = setInterval(createMoney, moneyBagTimer);
 
-let player = new Player(30, 550);
-let moneyBags = [
-  new Money(...randomPointInBank()),
-  new Money(...randomPointInBank())
-];
+let player = new Player(playerStartX, playerStartY);
+let moneyBags = [new Money(money1x, money1y), new Money(money2x, money2y)];
 let enemies = [
-  new Enemy(...randomPointInBank(), 2.0),
-  new Enemy(...randomPointInBank(), 1.0)
+  new Enemy(enemy1x, enemy1y, 2.0),
+  new Enemy(enemy2x, enemy2y, 1.5)
 ];
 let citizens = [];
 let policeCarsVertical = [
@@ -524,12 +505,7 @@ let policeCarsHorizontal = [
 ];
 
 function adjustSprites() {
-  const characters = [
-    player,
-    ...enemies,
-    ...policeCarsVertical,
-    ...policeCarsHorizontal
-  ];
+  const characters = [player, ...enemies];
   for (let i = 0; i < characters.length; i++) {
     for (let j = i + 1; j < characters.length; j++) {
       pushOff(characters[i], characters[j]);
